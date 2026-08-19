@@ -550,6 +550,13 @@ h1, h2, h3 { font-family: var(--font-head); line-height: 1.15; }
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 1.5rem;
 }
+/* En móvil: 2 tarjetas por fila (no 1) */
+@media (max-width: 560px) {
+  .team-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.9rem;
+  }
+}
 .member-card {
   background: var(--white);
   border: 1px solid var(--line);
@@ -595,6 +602,7 @@ h1, h2, h3 { font-family: var(--font-head); line-height: 1.15; }
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-wrap: wrap;
   gap: 8px;
   margin-top: 0.5rem;
 }
