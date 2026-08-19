@@ -1,1 +1,0 @@
-Coloca aquí las fotos del equipo (cuadradas, ej. 600x600). Luego enlázalas en script.js → arreglo TEAM, campo photo.
