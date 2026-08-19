@@ -368,6 +368,7 @@ h1, h2, h3 { font-family: var(--font-head); line-height: 1.15; }
 .sk-title { height: 18px; width: 75%; }
 .sk-short { width: 55%; }
 .sk-cta { width: 40%; height: 14px; margin-top: 0.9rem; }
+.sk-avatar { width: 100%; aspect-ratio: 1 / 1; border-radius: 0; }
 
 @keyframes sk-shimmer {
   0%   { background-position: 200% 0; }
@@ -589,16 +590,30 @@ h1, h2, h3 { font-family: var(--font-head); line-height: 1.15; }
   background: var(--bg-alt);
   color: var(--ink-soft);
 }
-.member-contact {
-  display: block;
-  margin-top: 0.7rem;
-  font-family: var(--font-head);
-  font-weight: 600;
-  font-size: 0.85rem;
-  color: var(--red);
-  transition: opacity 0.2s var(--ease);
+/* Cargo + ícono "in" de LinkedIn en la misma línea */
+.member-role-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 0.5rem;
 }
-.member-contact:hover { opacity: 0.7; }
+.member-role-row .member-role { margin-top: 0; }
+
+/* Ícono "in" de LinkedIn (azul, redirige al pulsar) */
+.member-in {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: #0a66c2; /* azul institucional de LinkedIn */
+  color: #fff;
+  flex: 0 0 auto;
+  transition: transform 0.2s var(--ease), background 0.2s var(--ease);
+}
+.member-in svg { width: 15px; height: 15px; fill: currentColor; }
+.member-in:hover { background: #004b8d; transform: translateY(-1px) scale(1.05); }
 
 /* Variantes de color de avatar (rotan por la paleta) */
 .av-red    { background: linear-gradient(135deg, #f85f6f, var(--red)); }

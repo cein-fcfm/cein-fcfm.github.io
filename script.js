@@ -3,26 +3,13 @@
    ========================================================= */
 
 /* ---- Equipo CEIN 2026 ----
-   Los datos llegan desde la hoja "Equipo" del Sheet (data.equipo).
-   Si la API todavía no envía el equipo, se usa esta lista de respaldo. */
-const TEAM_FALLBACK = [
-  { nombre: "Isidora Zenteno",  cargo: "Presidencia" },
-  { nombre: "Denisse Godoy",    cargo: "Coordinación" },
-  { nombre: "Trinidad Peña",    cargo: "Coordinación" },
-  { nombre: "Manuela González", cargo: "Proyectos y Extensión" },
-  { nombre: "Maite del Río",    cargo: "GDD" },
-  { nombre: "Javier Brito",     cargo: "Bienestar" },
-  { nombre: "Alonso Anabalón",  cargo: "Docencia" },
-  { nombre: "Javiera Vinaixa",  cargo: "Comunicaciones" },
-  { nombre: "Dominic Gajardo",  cargo: "Comunicaciones" },
-  { nombre: "José Tomás Muñoz", cargo: "Finanzas" },
-  { nombre: "Tomás Báez",       cargo: "Vinculación" },
-  { nombre: "Agustín Briceño",  cargo: "Comunidad" },
-  { nombre: "Fernanda Young",   cargo: "Comunidad" },
-  { nombre: "Benjamín González",cargo: "Deportes" },
-];
-
+   Los datos SIEMPRE se leen desde la hoja "Equipo" del Sheet (data.equipo).
+   No hay lista de respaldo: si el Sheet cambia, la web cambia. */
 const AVATAR_COLORS = ["av-red", "av-yellow", "av-green", "av-sky"];
+
+// Icono de LinkedIn (SVG en línea)
+const LINKEDIN_SVG =
+  '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.98 3.5A2.5 2.5 0 1 1 5 8.5a2.5 2.5 0 0 1-.02-5ZM3 9h4v12H3V9Zm6 0h3.8v1.6h.05c.53-1 1.83-2.05 3.77-2.05 4.03 0 4.78 2.65 4.78 6.1V21h-4v-5.3c0-1.27-.02-2.9-1.77-2.9-1.77 0-2.04 1.38-2.04 2.8V21H9V9Z"/></svg>';
 
 function initials(name) {
   return String(name || "")
@@ -50,8 +37,13 @@ function normalizeMember(m) {
     imageUrl: g("URL Imagen", "imageUrl", "urlImagen", "foto", "photo"),
     nombre: g("Nombre", "nombre", "name"),
     cargo: g("Cargo", "cargo", "role"),
-    textoContacto: g("Texto Contacto", "textoContacto", "contactoTexto"),
-    urlContacto: g("URL Contacto", "urlContacto", "contactoUrl"),
+    // La URL de LinkedIn viene de la columna "URL Linkedin".
+    // Se aceptan varias claves para funcionar con el backend actual
+    // (que la entrega en "textoContacto") y con versiones futuras.
+    urlLinkedin: g(
+      "URL Linkedin", "URL LinkedIn", "urlLinkedin", "linkedin", "Linkedin",
+      "URL Contacto", "urlContacto", "textoContacto"
+    ),
   };
 }
 
@@ -65,12 +57,48 @@ function prepareTeam(list) {
   return filtered;
 }
 
+/* ---- Estado: cargando (skeletons) ---- */
+function renderTeamLoading(count = 8) {
+  const grid = document.getElementById("team-grid");
+  if (!grid) return;
+  grid.setAttribute("aria-busy", "true");
+  grid.innerHTML = Array.from({ length: count })
+    .map(
+      () => `
+      <div class="member-card skeleton-card" aria-hidden="true">
+        <span class="sk sk-avatar"></span>
+        <div class="member-body">
+          <span class="sk sk-line sk-title"></span>
+          <span class="sk sk-line sk-short"></span>
+          <span class="sk sk-line sk-cta"></span>
+        </div>
+      </div>`
+    )
+    .join("");
+}
+
+/* ---- Estado: error ---- */
+function renderTeamError() {
+  const grid = document.getElementById("team-grid");
+  if (!grid) return;
+  grid.setAttribute("aria-busy", "false");
+  grid.innerHTML = `
+    <div class="resources-error" role="alert">
+      <span class="re-icon" aria-hidden="true">⚠️</span>
+      <p>No pudimos cargar al equipo en este momento.</p>
+      <button type="button" class="btn btn--ghost" id="team-retry">Reintentar</button>
+    </div>`;
+  const retry = document.getElementById("team-retry");
+  if (retry) retry.addEventListener("click", loadContent);
+}
+
+/* ---- Estado: con datos (siempre desde el Sheet) ---- */
 function renderTeam(members) {
   const grid = document.getElementById("team-grid");
   if (!grid) return;
 
-  const source = Array.isArray(members) && members.length ? members : TEAM_FALLBACK;
-  const list = prepareTeam(source.map(normalizeMember));
+  grid.setAttribute("aria-busy", "false");
+  const list = prepareTeam((Array.isArray(members) ? members : []).map(normalizeMember));
 
   if (!list.length) {
     grid.innerHTML = `
@@ -89,8 +117,9 @@ function renderTeam(members) {
       const photo = m.imageUrl
         ? `<img src="${encodeURI(m.imageUrl)}" alt="Foto de ${nombre}, ${cargo}" loading="lazy" onerror="this.remove()" />`
         : "";
-      const contact = m.urlContacto
-        ? `<a class="member-contact" href="${encodeURI(m.urlContacto)}" target="_blank" rel="noopener">${escapeHtml(m.textoContacto || "Contacto")} →</a>`
+      // Ícono "in" de LinkedIn junto al cargo: aparece solo si hay URL.
+      const linkedin = m.urlLinkedin
+        ? `<a class="member-in" href="${encodeURI(m.urlLinkedin)}" target="_blank" rel="noopener" aria-label="LinkedIn de ${nombre}" title="Ver LinkedIn de ${nombre}">${LINKEDIN_SVG}</a>`
         : "";
 
       return `
@@ -101,8 +130,10 @@ function renderTeam(members) {
           </div>
           <div class="member-body">
             <h3 class="member-name">${nombre}</h3>
-            <span class="member-role">${cargo}</span>
-            ${contact}
+            <div class="member-role-row">
+              <span class="member-role">${cargo}</span>
+              ${linkedin}
+            </div>
           </div>
         </article>`;
     })
@@ -392,11 +423,13 @@ function initNewsCarousel(count) {
 async function loadContent() {
   const resourcesGrid = document.getElementById("resources-grid");
   const newsGrid = document.getElementById("news-grid");
-  if (!resourcesGrid && !newsGrid) return;
+  const teamGrid = document.getElementById("team-grid");
+  if (!resourcesGrid && !newsGrid && !teamGrid) return;
 
-  // Estado de carga simultáneo en ambas secciones
+  // Estado de carga simultáneo en las tres secciones
   if (resourcesGrid) renderResourcesLoading(resourcesGrid);
   if (newsGrid) renderNewsLoading(newsGrid);
+  if (teamGrid) renderTeamLoading();
 
   try {
     // cache-buster + no-store: evita que el navegador sirva una respuesta vieja de la API
@@ -412,12 +445,13 @@ async function loadContent() {
 
     if (resourcesGrid) renderResources(resourcesGrid, recursos);
     if (newsGrid) renderNews(newsGrid, noticias);
-    if (equipo.length) renderTeam(equipo); // si la hoja "Equipo" ya viene, reemplaza el respaldo
+    if (teamGrid) renderTeam(equipo); // siempre desde el Sheet (data.equipo)
   } catch (err) {
     console.error("Error al cargar el contenido:", err);
-    // El error cubre ambas secciones, ya que dependen del mismo fetch
+    // El error cubre las tres secciones, ya que dependen del mismo fetch
     if (resourcesGrid) renderResourcesError(resourcesGrid);
     if (newsGrid) renderNewsError(newsGrid);
+    if (teamGrid) renderTeamError();
   }
 }
 
@@ -465,9 +499,8 @@ function initReveal() {
 
 /* ---- Init ---- */
 document.addEventListener("DOMContentLoaded", () => {
-  renderTeam();
   initNav();
-  loadContent();   // un solo fetch alimenta Recursos y Noticias
+  loadContent();   // un solo fetch alimenta Recursos, Noticias y Equipo
   initReveal();
 
   // Recalcula el carrusel (tarjetas por vista) al cambiar el tamaño
