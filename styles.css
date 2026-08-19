@@ -181,8 +181,8 @@ h1, h2, h3 { font-family: var(--font-head); line-height: 1.15; }
   text-transform: uppercase;
   letter-spacing: 2px;
   font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--ink-soft);
+  font-weight: 700;
+  color: var(--ink);
   margin-bottom: 1rem;
 }
 .hero-title {
