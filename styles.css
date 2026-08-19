@@ -115,7 +115,7 @@ h1, h2, h3 { font-family: var(--font-head); line-height: 1.15; }
   transition: color 0.2s var(--ease);
 }
 .nav-menu a:hover { color: var(--ink); }
-.nav-menu a:not(.nav-cta)::after {
+.nav-menu a::after {
   content: "";
   position: absolute;
   left: 0; bottom: -2px;
@@ -123,16 +123,13 @@ h1, h2, h3 { font-family: var(--font-head); line-height: 1.15; }
   background: var(--red);
   transition: width 0.25s var(--ease);
 }
-.nav-menu a:not(.nav-cta):hover::after { width: 100%; }
+.nav-menu a:hover::after { width: 100%; }
+/* "Contacto" destacado en rojo, sin fondo */
 .nav-cta {
-  background: var(--ink);
-  color: var(--white) !important;
-  padding: 8px 18px;
-  border-radius: 999px;
-  font-weight: 600;
-  transition: transform 0.2s var(--ease), background 0.2s var(--ease);
+  color: var(--red) !important;
+  font-weight: 700;
 }
-.nav-cta:hover { background: var(--red); transform: translateY(-1px); }
+.nav-cta:hover { color: var(--red) !important; }
 
 .nav-toggle {
   display: none;
@@ -163,11 +160,21 @@ h1, h2, h3 { font-family: var(--font-head); line-height: 1.15; }
   position: absolute;
   inset: 0;
   z-index: -1;
-  background:
-    radial-gradient(60% 50% at 12% 8%, var(--red-soft) 0%, transparent 60%),
-    radial-gradient(45% 45% at 92% 18%, var(--sky-soft) 0%, transparent 60%),
-    radial-gradient(50% 50% at 80% 92%, var(--yellow-soft) 0%, transparent 60%),
-    radial-gradient(40% 40% at 8% 95%, var(--green-soft) 0%, transparent 60%);
+  /* Foto de portada + capa clara encima para mantener legible el texto */
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.78) 0%, rgba(255, 255, 255, 0.5) 45%, rgba(255, 255, 255, 0.2) 100%),
+    url("assets/Portada.JPG");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+/* En móvil el texto ocupa todo el ancho: capa un poco más pareja para legibilidad */
+@media (max-width: 640px) {
+  .hero-bg {
+    background-image:
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.55) 100%),
+      url("assets/Portada.JPG");
+  }
 }
 .hero-inner { max-width: 760px; }
 .hero-eyebrow {
@@ -193,7 +200,8 @@ h1, h2, h3 { font-family: var(--font-head); line-height: 1.15; }
 .hero-subtitle {
   margin-top: 1.4rem;
   font-size: clamp(1rem, 2.2vw, 1.2rem);
-  color: var(--ink-soft);
+  color: var(--ink);
+  font-weight: 500;
   max-width: 60ch;
 }
 .hero-actions {
