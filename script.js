@@ -3,30 +3,29 @@
    ========================================================= */
 
 /* ---- Equipo CEIN 2026 ----
-   Para usar fotos reales, agrega la ruta en "photo"
-   (ej: "assets/equipo/isidora.jpg"). Si queda vacío,
-   se muestra automáticamente un avatar con las iniciales. */
-const TEAM = [
-  { name: "Isidora Zenteno",  role: "Presidencia",            photo: "" },
-  { name: "Denisse Godoy",    role: "Coordinación",           photo: "" },
-  { name: "Trinidad Peña",    role: "Coordinación",           photo: "" },
-  { name: "Manuela González", role: "Proyectos y Extensión",  photo: "" },
-  { name: "Maite del Río",    role: "GDD",                    photo: "" },
-  { name: "Javier Brito",     role: "Bienestar",              photo: "" },
-  { name: "Alonso Anabalón",  role: "Docencia",               photo: "" },
-  { name: "Javiera Vinaixa",  role: "Comunicaciones",         photo: "" },
-  { name: "Dominic Gajardo",  role: "Comunicaciones",         photo: "" },
-  { name: "José Tomás Muñoz", role: "Finanzas",               photo: "" },
-  { name: "Tomás Báez",       role: "Vinculación",            photo: "" },
-  { name: "Agustín Briceño",  role: "Comunidad",              photo: "" },
-  { name: "Fernanda Young",   role: "Comunidad",              photo: "" },
-  { name: "Benjamín González",role: "Deportes",               photo: "" },
+   Los datos llegan desde la hoja "Equipo" del Sheet (data.equipo).
+   Si la API todavía no envía el equipo, se usa esta lista de respaldo. */
+const TEAM_FALLBACK = [
+  { nombre: "Isidora Zenteno",  cargo: "Presidencia" },
+  { nombre: "Denisse Godoy",    cargo: "Coordinación" },
+  { nombre: "Trinidad Peña",    cargo: "Coordinación" },
+  { nombre: "Manuela González", cargo: "Proyectos y Extensión" },
+  { nombre: "Maite del Río",    cargo: "GDD" },
+  { nombre: "Javier Brito",     cargo: "Bienestar" },
+  { nombre: "Alonso Anabalón",  cargo: "Docencia" },
+  { nombre: "Javiera Vinaixa",  cargo: "Comunicaciones" },
+  { nombre: "Dominic Gajardo",  cargo: "Comunicaciones" },
+  { nombre: "José Tomás Muñoz", cargo: "Finanzas" },
+  { nombre: "Tomás Báez",       cargo: "Vinculación" },
+  { nombre: "Agustín Briceño",  cargo: "Comunidad" },
+  { nombre: "Fernanda Young",   cargo: "Comunidad" },
+  { nombre: "Benjamín González",cargo: "Deportes" },
 ];
 
 const AVATAR_COLORS = ["av-red", "av-yellow", "av-green", "av-sky"];
 
 function initials(name) {
-  return name
+  return String(name || "")
     .split(" ")
     .filter(Boolean)
     .slice(0, 2)
@@ -35,29 +34,81 @@ function initials(name) {
     .toUpperCase();
 }
 
-function renderTeam() {
+/* Normaliza una fila de la hoja "Equipo" a un objeto uniforme.
+   Acepta tanto las claves del Sheet ("Nombre", "URL Imagen"...) como
+   variantes en camelCase por si el backend las transforma. */
+function normalizeMember(m) {
+  const g = (...keys) => {
+    for (const k of keys) {
+      if (m[k] !== undefined && m[k] !== null && String(m[k]).trim() !== "") return m[k];
+    }
+    return "";
+  };
+  return {
+    mostrar: g("Mostrar", "mostrar", "Visible", "visible"),
+    orden: Number(g("Orden", "orden") || 0),
+    imageUrl: g("URL Imagen", "imageUrl", "urlImagen", "foto", "photo"),
+    nombre: g("Nombre", "nombre", "name"),
+    cargo: g("Cargo", "cargo", "role"),
+    textoContacto: g("Texto Contacto", "textoContacto", "contactoTexto"),
+    urlContacto: g("URL Contacto", "urlContacto", "contactoUrl"),
+  };
+}
+
+/* Filtra por "Mostrar" = SI y ordena por "Orden" (si vienen esos campos) */
+function prepareTeam(list) {
+  const yes = (v) => ["si", "sí", "true", "1", "x", "yes"].includes(String(v).trim().toLowerCase());
+  const hasMostrar = list.some((m) => String(m.mostrar).trim() !== "");
+  const filtered = hasMostrar ? list.filter((m) => yes(m.mostrar)) : list;
+  const hasOrden = filtered.some((m) => m.orden > 0);
+  if (hasOrden) filtered.sort((a, b) => (a.orden || 9999) - (b.orden || 9999));
+  return filtered;
+}
+
+function renderTeam(members) {
   const grid = document.getElementById("team-grid");
   if (!grid) return;
 
-  const html = TEAM.map((m, i) => {
-    const colorClass = AVATAR_COLORS[i % AVATAR_COLORS.length];
-    const photo = m.photo
-      ? `<img src="${m.photo}" alt="Foto de ${m.name}, ${m.role}" loading="lazy" />`
-      : "";
-    return `
-      <article class="member-card reveal">
-        <div class="member-photo ${colorClass}">
-          ${photo}
-          <span aria-hidden="true">${initials(m.name)}</span>
-        </div>
-        <div class="member-body">
-          <h3 class="member-name">${m.name}</h3>
-          <span class="member-role">${m.role}</span>
-        </div>
-      </article>`;
-  }).join("");
+  const source = Array.isArray(members) && members.length ? members : TEAM_FALLBACK;
+  const list = prepareTeam(source.map(normalizeMember));
 
-  grid.innerHTML = html;
+  if (!list.length) {
+    grid.innerHTML = `
+      <div class="resources-error">
+        <span class="re-icon" aria-hidden="true">👥</span>
+        <p>Pronto conocerás al equipo CEIN 2026.</p>
+      </div>`;
+    return;
+  }
+
+  grid.innerHTML = list
+    .map((m, i) => {
+      const colorClass = AVATAR_COLORS[i % AVATAR_COLORS.length];
+      const nombre = escapeHtml(m.nombre);
+      const cargo = escapeHtml(m.cargo);
+      const photo = m.imageUrl
+        ? `<img src="${encodeURI(m.imageUrl)}" alt="Foto de ${nombre}, ${cargo}" loading="lazy" onerror="this.remove()" />`
+        : "";
+      const contact = m.urlContacto
+        ? `<a class="member-contact" href="${encodeURI(m.urlContacto)}" target="_blank" rel="noopener">${escapeHtml(m.textoContacto || "Contacto")} →</a>`
+        : "";
+
+      return `
+        <article class="member-card reveal">
+          <div class="member-photo ${colorClass}">
+            ${photo}
+            <span aria-hidden="true">${initials(m.nombre)}</span>
+          </div>
+          <div class="member-body">
+            <h3 class="member-name">${nombre}</h3>
+            <span class="member-role">${cargo}</span>
+            ${contact}
+          </div>
+        </article>`;
+    })
+    .join("");
+
+  initReveal();
 }
 
 /* =========================================================
@@ -207,6 +258,14 @@ function renderNews(grid, items) {
         <span class="re-icon" aria-hidden="true">📰</span>
         <p>Aún no hay noticias publicadas. ¡Vuelve pronto!</p>
       </div>`;
+    // Sin noticias: oculta flechas y puntos del carrusel
+    if (newsTimer) clearInterval(newsTimer);
+    const prev = document.getElementById("news-prev");
+    const next = document.getElementById("news-next");
+    const dots = document.getElementById("news-dots");
+    if (prev) prev.hidden = true;
+    if (next) next.hidden = true;
+    if (dots) { dots.innerHTML = ""; dots.style.display = "none"; }
     return;
   }
 
@@ -340,16 +399,20 @@ async function loadContent() {
   if (newsGrid) renderNewsLoading(newsGrid);
 
   try {
-    const res = await fetch(CONTENT_API, { method: "GET" });
+    // cache-buster + no-store: evita que el navegador sirva una respuesta vieja de la API
+    const url = CONTENT_API + (CONTENT_API.includes("?") ? "&" : "?") + "cb=" + Date.now();
+    const res = await fetch(url, { method: "GET", cache: "no-store" });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
 
     // Extrae cada arreglo del objeto único
     const recursos = Array.isArray(data?.recursos) ? data.recursos : [];
     const noticias = Array.isArray(data?.noticias) ? data.noticias : [];
+    const equipo = Array.isArray(data?.equipo) ? data.equipo : [];
 
     if (resourcesGrid) renderResources(resourcesGrid, recursos);
     if (newsGrid) renderNews(newsGrid, noticias);
+    if (equipo.length) renderTeam(equipo); // si la hoja "Equipo" ya viene, reemplaza el respaldo
   } catch (err) {
     console.error("Error al cargar el contenido:", err);
     // El error cubre ambas secciones, ya que dependen del mismo fetch

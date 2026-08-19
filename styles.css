@@ -589,6 +589,16 @@ h1, h2, h3 { font-family: var(--font-head); line-height: 1.15; }
   background: var(--bg-alt);
   color: var(--ink-soft);
 }
+.member-contact {
+  display: block;
+  margin-top: 0.7rem;
+  font-family: var(--font-head);
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--red);
+  transition: opacity 0.2s var(--ease);
+}
+.member-contact:hover { opacity: 0.7; }
 
 /* Variantes de color de avatar (rotan por la paleta) */
 .av-red    { background: linear-gradient(135deg, #f85f6f, var(--red)); }
