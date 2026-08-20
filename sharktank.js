@@ -54,6 +54,15 @@ function formateaRutVivo(raw) {
 const $ = (id) => document.getElementById(id);
 function setDia(txt) { $("shark-dia").textContent = txt; }
 
+// Aviso persistente (vive fuera de #shark-content, no se borra al recargar la grilla)
+function flash(tipo, html) {
+  const el = $("shark-flash");
+  if (!el) return;
+  el.className = "resultado" + (tipo ? " " + tipo : "");
+  el.innerHTML = html || "";
+}
+function limpiarFlash() { flash("", ""); }
+
 function msg(icon, texto) {
   $("shark-content").innerHTML =
     `<div class="shark-msg"><span class="big" aria-hidden="true">${icon}</span><p>${texto}</p></div>`;
@@ -134,8 +143,7 @@ function renderReserva() {
       </div>
     </div>
 
-    <button type="button" class="btn btn--primary btn-reservar" id="btn-reservar" disabled>Reservar</button>
-    <div class="resultado" id="resultado"></div>`;
+    <button type="button" class="btn btn--primary btn-reservar" id="btn-reservar" disabled>Reservar</button>`;
 
   // Eventos de los slots
   $("slots-wrap").querySelectorAll(".slot:not(:disabled)").forEach((b) => {
@@ -214,9 +222,7 @@ async function enviarReserva() {
   const nombre = $("nombre").value.trim();
   const rut = $("rut").value.trim();
   const st = estadoSeleccion();
-  const resultado = $("resultado");
-  resultado.className = "resultado";
-  resultado.textContent = "";
+  limpiarFlash();
 
   // Validaciones finales en cliente (el servidor las repite)
   if (!nombre) { $("err-nombre").textContent = "Ingresa tu nombre."; return; }
@@ -241,17 +247,18 @@ async function enviarReserva() {
     const data = await res.json();
 
     if (data.ok) {
-      resultado.className = "resultado ok";
-      resultado.innerHTML = `✅ ¡Reserva confirmada! <strong>${nombre}</strong>, tienes la Sharktank el ${data.dia} en: ${horas.join(", ")}.`;
-      await cargar(); // recarga disponibilidad actualizada
+      await cargar(); // recarga la disponibilidad (reconstruye la grilla)
+      // El aviso vive fuera de la grilla, así que persiste tras recargar
+      flash(
+        "ok",
+        `✅ <strong>¡Reserva confirmada!</strong> ${nombre}, tienes la Sharktank el ${data.dia} en: ${horas.join(", ")}. ¡Te esperamos! 🦈`
+      );
     } else {
-      resultado.className = "resultado fail";
-      resultado.textContent = "⚠️ " + (data.error || "No se pudo completar la reserva.");
+      flash("fail", "⚠️ " + (data.error || "No se pudo completar la reserva."));
     }
   } catch (err) {
     console.error("Error al reservar:", err);
-    resultado.className = "resultado fail";
-    resultado.textContent = "⚠️ Error de conexión. Intenta nuevamente.";
+    flash("fail", "⚠️ Error de conexión. Intenta nuevamente.");
   } finally {
     enviando = false;
     if ($("btn-reservar")) {

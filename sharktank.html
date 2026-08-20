@@ -164,6 +164,9 @@
         <h2>Reservar horario</h2>
         <span class="dia-actual" id="shark-dia">Cargando…</span>
 
+        <!-- Aviso persistente (éxito / error). No se borra al recargar la grilla. -->
+        <div class="resultado" id="shark-flash" role="status" aria-live="polite"></div>
+
         <!-- Aquí se inyecta el estado: cargando / sin cupos / grilla -->
         <div id="shark-content">
           <div class="shark-skeleton" aria-hidden="true">
@@ -175,6 +178,6 @@
     </div>
   </main>
 
-  <script src="sharktank.js?v=4"></script>
+  <script src="sharktank.js?v=5"></script>
 </body>
 </html>
