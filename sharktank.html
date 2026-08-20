@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Reserva la sala Sharktank del CEIN · Ingeniería Civil Industrial, Universidad de Chile." />
+  <meta name="theme-color" content="#F31F35" />
+  <title>Reserva Sharktank · CEIN</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="assets/favicon.png" />
+  <link rel="stylesheet" href="styles.css?v=16" />
+
+  <style>
+    /* ---- Estilos propios de la página de reserva ---- */
+    .sub-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: saturate(180%) blur(12px);
+      border-bottom: 1px solid var(--line);
+    }
+    .sub-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 68px;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-head);
+      font-weight: 600;
+      color: var(--ink-soft);
+      transition: color 0.2s var(--ease);
+    }
+    .back-link:hover { color: var(--red); }
+
+    .room-hero {
+      position: relative;
+      border-radius: var(--radius);
+      overflow: hidden;
+      aspect-ratio: 16 / 7;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--sky), var(--green));
+      margin-bottom: 2.5rem;
+      box-shadow: var(--shadow);
+    }
+    .room-hero img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .room-hero .room-emoji { font-size: 5rem; }
+    .room-hero .room-badge {
+      position: absolute;
+      left: 1.2rem; bottom: 1.2rem;
+      background: var(--red);
+      color: #fff;
+      font-family: var(--font-head);
+      font-weight: 700;
+      font-size: 0.85rem;
+      padding: 7px 16px;
+      border-radius: 999px;
+    }
+
+    .reserva-layout {
+      display: grid;
+      grid-template-columns: 1fr 1.1fr;
+      gap: 2.5rem;
+      align-items: start;
+    }
+    @media (max-width: 800px) {
+      .reserva-layout { grid-template-columns: 1fr; gap: 2rem; }
+    }
+
+    .room-info h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 800; letter-spacing: -0.5px; }
+    .room-info p.lead { color: var(--ink-soft); margin-top: 0.8rem; font-size: 1.05rem; }
+    .room-features { list-style: none; padding: 0; margin: 1.6rem 0 0; display: grid; gap: 0.7rem; }
+    .room-features li {
+      display: flex; align-items: center; gap: 10px;
+      font-weight: 500;
+    }
+    .room-features .ico {
+      width: 34px; height: 34px; flex: 0 0 auto;
+      display: grid; place-items: center;
+      border-radius: 9px; background: var(--bg-alt); font-size: 1.1rem;
+    }
+    .room-note {
+      margin-top: 1.6rem;
+      padding: 1rem 1.2rem;
+      background: var(--yellow-soft);
+      border-radius: var(--radius-sm);
+      font-size: 0.92rem;
+      color: var(--ink);
+    }
+
+    /* ---- Formulario ---- */
+    .reserva-form-card {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1.8rem;
+    }
+    .reserva-form-card h2 { font-size: 1.35rem; font-weight: 800; margin-bottom: 1.2rem; }
+    .form-row { margin-bottom: 1.1rem; }
+    .form-row.two { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; }
+    .form-row label {
+      display: block;
+      font-family: var(--font-head);
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-bottom: 0.4rem;
+    }
+    .form-row input, .form-row textarea, .form-row select {
+      width: 100%;
+      padding: 11px 13px;
+      border: 1.5px solid var(--line);
+      border-radius: var(--radius-sm);
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      color: var(--ink);
+      background: var(--white);
+      transition: border-color 0.2s var(--ease);
+    }
+    .form-row input:focus, .form-row textarea:focus, .form-row select:focus {
+      outline: none;
+      border-color: var(--red);
+    }
+    .form-row textarea { resize: vertical; min-height: 84px; }
+    .form-submit {
+      width: 100%;
+      border: 0;
+      cursor: pointer;
+      justify-content: center;
+      margin-top: 0.3rem;
+    }
+    .form-hint { font-size: 0.82rem; color: var(--ink-soft); margin-top: 0.9rem; text-align: center; }
+    .form-ok {
+      display: none;
+      margin-top: 1rem;
+      padding: 0.9rem 1.1rem;
+      background: var(--green-soft);
+      border-radius: var(--radius-sm);
+      color: var(--ink);
+      font-size: 0.92rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header simple con volver -->
+  <header class="sub-header">
+    <nav class="sub-nav container" aria-label="Navegación">
+      <a href="index.html" class="brand" aria-label="Inicio CEIN">
+        <img src="assets/logo.png" alt="CEIN" class="brand-logo" />
+      </a>
+      <a href="index.html#reservas" class="back-link">← Volver</a>
+    </nav>
+  </header>
+
+  <main class="container" style="padding-top: 2.5rem; padding-bottom: 4rem;">
+    <!-- Imagen de la sala -->
+    <div class="room-hero">
+      <img src="assets/sharktank.jpg" alt="Sala Sharktank" onerror="this.remove()" />
+      <span class="room-emoji" aria-hidden="true">🦈</span>
+      <span class="room-badge">Sala Sharktank</span>
+    </div>
+
+    <div class="reserva-layout">
+      <!-- Información de la sala -->
+      <section class="room-info">
+        <h1>Reserva la <span style="color: var(--red)">Sharktank</span></h1>
+        <p class="lead">La sala estrella del CEIN: un espacio equipado para reuniones, presentaciones y trabajo en equipo. Completa el formulario para reservar tu horario.</p>
+
+        <ul class="room-features">
+          <li><span class="ico" aria-hidden="true">👥</span> Capacidad para hasta 10 personas</li>
+          <li><span class="ico" aria-hidden="true">📺</span> Pantalla / proyector para presentaciones</li>
+          <li><span class="ico" aria-hidden="true">🪑</span> Mesa de reuniones y pizarra</li>
+          <li><span class="ico" aria-hidden="true">🕐</span> Disponible en horario de funcionamiento del DII</li>
+        </ul>
+
+        <div class="room-note">
+          <strong>Ten en cuenta:</strong> tu reserva queda sujeta a confirmación del CEIN. Te contactaremos al correo indicado para confirmar la disponibilidad.
+        </div>
+      </section>
+
+      <!-- Formulario de reserva -->
+      <section class="reserva-form-card">
+        <h2>Formulario de reserva</h2>
+        <form id="reserva-form" novalidate>
+          <div class="form-row">
+            <label for="nombre">Nombre completo</label>
+            <input type="text" id="nombre" name="nombre" required placeholder="Tu nombre" />
+          </div>
+          <div class="form-row">
+            <label for="correo">Correo</label>
+            <input type="email" id="correo" name="correo" required placeholder="tucorreo@ug.uchile.cl" />
+          </div>
+          <div class="form-row">
+            <label for="fecha">Fecha</label>
+            <input type="date" id="fecha" name="fecha" required />
+          </div>
+          <div class="form-row two">
+            <div>
+              <label for="inicio">Hora inicio</label>
+              <input type="time" id="inicio" name="inicio" required />
+            </div>
+            <div>
+              <label for="fin">Hora término</label>
+              <input type="time" id="fin" name="fin" required />
+            </div>
+          </div>
+          <div class="form-row">
+            <label for="motivo">Motivo de la reserva</label>
+            <textarea id="motivo" name="motivo" placeholder="Ej: reunión de proyecto, estudio, entrevista…"></textarea>
+          </div>
+
+          <button type="submit" class="btn btn--primary form-submit">Enviar solicitud de reserva</button>
+          <p class="form-hint">Al enviar se abrirá tu correo con la solicitud lista para enviar al CEIN.</p>
+          <div class="form-ok" id="form-ok">¡Listo! Revisa tu cliente de correo para enviar la solicitud a <strong>cein@cein.cl</strong>.</div>
+        </form>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    // Fecha mínima = hoy
+    (function () {
+      const f = document.getElementById("fecha");
+      if (f) f.min = new Date().toISOString().split("T")[0];
+    })();
+
+    // Al enviar, arma un correo (mailto) con los datos de la reserva.
+    // Para conectar a un Google Form / Apps Script, reemplaza este handler.
+    document.getElementById("reserva-form").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const form = e.target;
+      if (!form.checkValidity()) { form.reportValidity(); return; }
+
+      const g = (id) => document.getElementById(id).value.trim();
+      const nombre = g("nombre"), correo = g("correo"), fecha = g("fecha");
+      const inicio = g("inicio"), fin = g("fin"), motivo = g("motivo");
+
+      if (fin <= inicio) {
+        alert("La hora de término debe ser posterior a la de inicio.");
+        return;
+      }
+
+      const asunto = `Reserva Sharktank · ${fecha} ${inicio}-${fin} · ${nombre}`;
+      const cuerpo =
+        `Hola CEIN,\n\nQuisiera reservar la sala Sharktank con los siguientes datos:\n\n` +
+        `• Nombre: ${nombre}\n` +
+        `• Correo: ${correo}\n` +
+        `• Fecha: ${fecha}\n` +
+        `• Horario: ${inicio} a ${fin}\n` +
+        `• Motivo: ${motivo || "(no especificado)"}\n\n` +
+        `Quedo atento(a) a la confirmación. ¡Gracias!`;
+
+      window.location.href =
+        `mailto:cein@cein.cl?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
+
+      document.getElementById("form-ok").style.display = "block";
+    });
+  </script>
+</body>
+</html>

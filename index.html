@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="icon" type="image/png" href="assets/favicon.png" />
-  <link rel="stylesheet" href="styles.css?v=16" />
+  <link rel="stylesheet" href="styles.css?v=17" />
 </head>
 <body>
   <!-- ===== Header / Navbar ===== -->
@@ -34,6 +34,7 @@
         <li><a href="#inicio">Inicio</a></li>
         <li><a href="#noticias">Noticias</a></li>
         <li><a href="#recursos">Recursos</a></li>
+        <li><a href="#reservas">Reservas</a></li>
         <li><a href="#equipo">Conócenos</a></li>
         <li><a href="#contacto" class="nav-cta">Contacto</a></li>
       </ul>
@@ -119,8 +120,45 @@
       </div>
     </section>
 
+    <!-- ===== Reserva de espacios ===== -->
+    <section class="section" id="reservas">
+      <div class="container">
+        <header class="section-head">
+          <span class="section-kicker">Espacios</span>
+          <h2 class="section-title">Reserva de espacios</h2>
+          <p class="section-lead">Reserva los espacios del CEIN para tus reuniones, estudio o actividades.</p>
+        </header>
+
+        <div class="reserva-grid">
+          <a class="reserva-card" href="https://sgr.dii.uchile.cl/" target="_blank" rel="noopener">
+            <div class="reserva-photo">
+              <img src="assets/salitas.jpg" alt="Salitas DII" loading="lazy" onerror="this.remove()" />
+              <span class="reserva-fallback" aria-hidden="true">🚪</span>
+            </div>
+            <div class="reserva-body">
+              <h3 class="reserva-title">Salitas DII</h3>
+              <p class="reserva-desc">Reserva las salas de estudio del Departamento de Ingeniería Industrial.</p>
+              <span class="reserva-cta">Reservar →</span>
+            </div>
+          </a>
+
+          <a class="reserva-card" href="sharktank.html">
+            <div class="reserva-photo">
+              <img src="assets/sharktank.jpg" alt="Sala Sharktank" loading="lazy" onerror="this.remove()" />
+              <span class="reserva-fallback" aria-hidden="true">🦈</span>
+            </div>
+            <div class="reserva-body">
+              <h3 class="reserva-title">Sharktank</h3>
+              <p class="reserva-desc">Nuestra sala estrella para reuniones y presentaciones. Reserva tu horario.</p>
+              <span class="reserva-cta">Reservar →</span>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
     <!-- ===== Conócenos / Equipo ===== -->
-    <section class="section" id="equipo">
+    <section class="section section--alt" id="equipo">
       <div class="container">
         <header class="section-head">
           <span class="section-kicker">Conócenos</span>
