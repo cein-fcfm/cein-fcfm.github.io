@@ -39,6 +39,16 @@ function formateaRut(r) {
   const dv = s.slice(-1);
   return cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, ".") + "-" + dv;
 }
+// Formatea en vivo mientras se escribe: solo números y K (K solo al final)
+function formateaRutVivo(raw) {
+  let s = String(raw).toUpperCase().replace(/[^0-9K]/g, ""); // solo dígitos y K
+  s = s.replace(/K(?=.)/g, "");                               // K únicamente al final
+  s = s.slice(0, 9);                                          // máx 8 dígitos + dígito verificador
+  if (s.length < 2) return s;
+  const cuerpo = s.slice(0, -1);
+  const dv = s.slice(-1);
+  return cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, ".") + "-" + dv;
+}
 
 /* ---------- Utilidades de UI ---------- */
 const $ = (id) => document.getElementById(id);
@@ -134,12 +144,11 @@ function renderReserva() {
 
   // Validación de RUT en vivo
   const rutInput = $("rut");
-  rutInput.addEventListener("blur", () => {
-    const v = rutInput.value.trim();
-    if (v) rutInput.value = formateaRut(v);
+  rutInput.addEventListener("input", () => {
+    rutInput.value = formateaRutVivo(rutInput.value); // filtra y da formato al escribir
     validarCampos();
   });
-  rutInput.addEventListener("input", validarCampos);
+  rutInput.addEventListener("blur", validarCampos);
   $("nombre").addEventListener("input", validarCampos);
 
   $("btn-reservar").addEventListener("click", enviarReserva);
